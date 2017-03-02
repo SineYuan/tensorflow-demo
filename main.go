@@ -89,16 +89,28 @@ func Predict(c pb.PredictionServiceClient, imgBytes []byte) (result [10]float32,
 					Name: "batch",
 				},
 				&tf_framework.TensorShapeProto_Dim{
-					Size: int64(784),
-					Name: "data",
+					Size: int64(28),
+					Name: "x",
 				},
+				&tf_framework.TensorShapeProto_Dim{
+					Size: int64(28),
+					Name: "y",
+				},
+				&tf_framework.TensorShapeProto_Dim{
+					Size: int64(1),
+					Name: "channel",
+				},
+
 			},
 		},
 	}
 	req.Inputs["x"] = tp
 
-	r, err := c.Predict(context.Background(), req)
-	output, ok := r.Outputs["y"]
+	resp, err := c.Predict(context.Background(), req)
+	if err != nil {
+		return
+	}
+	output, ok := resp.Outputs["y"]
 	if !ok {
 		err = fmt.Errorf("can not find output data with label y")
 		return
